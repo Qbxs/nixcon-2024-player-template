@@ -22,7 +22,7 @@
         packages = {webserver = pkgs.writers.writeHaskell "webserver"
           {
             libraries = with pkgs.haskellPackages;
-            [ servant servant-server base-compat ];
+            [ servant servant-server base-compat lucid blaze ];
           }
             ./Main.hs;
           default = packages.webserver;
