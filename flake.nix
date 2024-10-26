@@ -19,14 +19,14 @@
     (flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let pkgs = import nixpkgs { inherit system; };
       in rec {
-        packages = {pkgs.writers.writeHaskell "webserver"
+        packages = [{pkgs.writers.writeHaskell "webserver"
           {
             libraries = with pkgs.haskellPackages;
             [ servant ];
             ./Main.hs
           }  # TODO
           default = packages.webserver;
-        };
+        }];
         apps.default = {
           type = "app";
           program = pkgs.lib.getExe (
