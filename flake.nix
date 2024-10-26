@@ -23,8 +23,9 @@
           {
             libraries = with pkgs.haskellPackages;
             [ servant ];
+          }
             ./Main.hs
-          }  # TODO
+            # TODO
           default = packages.webserver;
         }];
         apps.default = {
