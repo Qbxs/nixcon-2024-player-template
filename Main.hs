@@ -37,18 +37,33 @@ import Servant.Types.SourceT (source)
 import qualified Data.Aeson.Parser
 import qualified Text.Blaze.Html
 
-type RootAPI = Get '[JSON] ()
---   :<|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Int
+type API = Get '[JSON] String
+     :<|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] APIResult 
+     :<|> "mul" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] APIResult 
 
-server :: Server RootAPI
-server = return ()
---   <|> (return (\x y -> x + y))
+newtype APIResult = APIResult { result :: Int }
+  deriving Generic
+instance ToJSON APIResult
+
+server :: Server API
+server = base
+    :<|> add
+    :<|> mul
+
+base :: Handler String
+base = return ""
+
+add :: Int -> Int -> Handler APIResult 
+add x y = return $ APIResult $ x + y
+
+mul :: Int -> Int -> Handler APIResult 
+mul x y = return $ APIResult $ x * y
+
+rootAPI :: Proxy API
+rootAPI = Proxy
 
 app :: Application
 app = serve rootAPI server
-
-rootAPI :: Proxy RootAPI
-rootAPI = Proxy
 
 main :: IO ()
 main = run 8080 app
