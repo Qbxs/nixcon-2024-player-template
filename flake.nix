@@ -12,19 +12,32 @@
     };
   };
 
-  outputs = { self, nixpkgs, garnix-lib, flake-utils }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      garnix-lib,
+      flake-utils,
+    }:
     let
       system = "x86_64-linux";
     in
-    (flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
-      let pkgs = import nixpkgs { inherit system; };
-      in rec {
-        packages = {webserver = pkgs.writers.writeHaskell "webserver"
-          {
-            libraries = with pkgs.haskellPackages;
-            [ servant servant-server base-compat lucid blaze ];
-          }
-            ./Main.hs;
+    (flake-utils.lib.eachSystem [ "x86_64-linux" ] (
+      system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in
+      rec {
+        packages = {
+          webserver = pkgs.writers.writeHaskell "webserver" {
+            libraries = with pkgs.haskellPackages; [
+              servant
+              servant-server
+              base-compat
+              lucid
+              blaze
+            ];
+          } ./Main.hs;
           default = packages.webserver;
         };
         apps.default = {
@@ -41,29 +54,32 @@
             }
           );
         };
-      }))
-    //
-    {
+      }
+    ))
+    // {
       nixosConfigurations.server = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           garnix-lib.nixosModules.garnix
           self.nixosModules.nixcon-garnix-player-module
-          ({ pkgs, ... }: {
-            playerConfig = {
-              # Your github user:
-              githubLogin = "Qbxs";
-              # You only need to change this if you changed the forked repo name.
-              githubRepo = "nixcon-2024-player-template";
-              # The nix derivation that will be used as the server process. It
-              # should open a webserver on port 8080.
-              # The port is also provided to the process as the environment variable "PORT".
-              webserver = self.packages.${system}.webserver;
-              # If you want to log in to your deployed server, put your SSH key
-              # here:
-              sshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGAHcqar+k/8/K1bSQ3TqZtenUSZjW9lWWA4lfx1oSM";
-            };
-          })
+          (
+            { pkgs, ... }:
+            {
+              playerConfig = {
+                # Your github user:
+                githubLogin = "Qbxs";
+                # You only need to change this if you changed the forked repo name.
+                githubRepo = "nixcon-2024-player-template";
+                # The nix derivation that will be used as the server process. It
+                # should open a webserver on port 8080.
+                # The port is also provided to the process as the environment variable "PORT".
+                webserver = self.packages.${system}.webserver;
+                # If you want to log in to your deployed server, put your SSH key
+                # here:
+                sshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHGAHcqar+k/8/K1bSQ3TqZtenUSZjW9lWWA4lfx1oSM";
+              };
+            }
+          )
         ];
       };
 
