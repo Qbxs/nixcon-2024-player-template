@@ -8,7 +8,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
-module ApiType where
+module Main where
 
 import Data.Text
 import Data.Time (UTCTime)
@@ -16,9 +16,11 @@ import Servant
 import Servant.API
 
 type RootAPI = Get '[JSON] ()
+  <|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Int
 
 server :: Server RootAPI
 server = return ()
+  <|> return (\x y -> x + y)
 
 app :: Application
 app = serve rootAPI server
