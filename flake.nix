@@ -36,6 +36,7 @@
               base-compat
               lucid
               blaze
+              process
               uuid
             ];
           } ./Main.hs;
@@ -66,6 +67,7 @@
           (
             { pkgs, ... }:
             {
+              environment.systemPackages = [ pkgs.cowsay ];
               playerConfig = {
                 # Your github user:
                 githubLogin = "Qbxs";

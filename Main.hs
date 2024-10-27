@@ -36,6 +36,7 @@ import Text.Blaze.Html.Renderer.Utf8
 import Servant.Types.SourceT (source)
 import qualified Data.Aeson.Parser
 import qualified Text.Blaze.Html
+import System.Process (readProcess)
 import Data.UUID.V4 (nextRandom)
 import Data.UUID (toString)
 
@@ -43,6 +44,7 @@ import Data.UUID (toString)
 type API = Get '[JSON] String
      :<|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] (APIResult Int)
      :<|> "mul" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] (APIResult Int)
+     :<|> "cowsay" :> Capture "string" String :> Get '[JSON] (APIResult String)
      :<|> "uuid" :> Get '[JSON] (APIResult String)
 
 newtype APIResult a = APIResult { result :: a }
@@ -53,6 +55,7 @@ server :: Server API
 server = base
     :<|> add
     :<|> mul
+    :<|> cowsay 
     :<|> uuid
 
 base :: Handler String
@@ -68,6 +71,11 @@ uuid :: Handler (APIResult String)
 uuid = do
   uuid <- liftIO $ nextRandom
   return $ APIResult $ toString uuid
+
+cowsay :: String -> Handler (APIResult String)
+cowsay s = do
+    moo <- liftIO $ readProcess "cowsay" [s] ""
+    return $ APIResult moo
 
 rootAPI :: Proxy API
 rootAPI = Proxy
