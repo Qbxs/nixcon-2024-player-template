@@ -64,14 +64,10 @@ mul :: Int -> Int -> Handler String
 mul x y = return $ show $ x * y
 
 uuid :: Handler String
-uuid = do
-  uuid <- liftIO $ nextRandom
-  return $ toString uuid
+uuid = toString <$> liftIO nextRandom
 
 cowsay :: String -> Handler String
-cowsay s = do
-    moo <- liftIO $ readProcess "cowsay" [s] ""
-    return moo
+cowsay s = liftIO $ readProcess "cowsay" [s] ""
 
 rootAPI :: Proxy API
 rootAPI = Proxy
