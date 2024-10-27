@@ -41,15 +41,11 @@ import Data.UUID.V4 (nextRandom)
 import Data.UUID (toString)
 
 
-type API = Get '[JSON] String
-     :<|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] (APIResult Int)
-     :<|> "mul" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] (APIResult Int)
-     :<|> "cowsay" :> Capture "string" String :> Get '[JSON] (APIResult String)
-     :<|> "uuid" :> Get '[JSON] (APIResult String)
-
-newtype APIResult a = APIResult { result :: a }
-  deriving Generic
-instance (ToJSON a) => ToJSON (APIResult a)
+type API = Get '[PlainText] String
+     :<|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[PlainText] String
+     :<|> "mul" :> Capture "x" Int :> Capture "y" Int :> Get '[PlainText] String
+     :<|> "cowsay" :> Capture "string" String :> Get '[PlainText] String
+     :<|> "uuid" :> Get '[PlainText] String
 
 server :: Server API
 server = base
@@ -58,24 +54,24 @@ server = base
     :<|> cowsay 
     :<|> uuid
 
-base :: Handler String
+base :: Handler String 
 base = return ""
 
-add :: Int -> Int -> Handler (APIResult Int)
-add x y = return $ APIResult $ x + y
+add :: Int -> Int -> Handler String
+add x y = return $ show $ x + y
 
-mul :: Int -> Int -> Handler (APIResult Int)
-mul x y = return $ APIResult $ x * y
+mul :: Int -> Int -> Handler String
+mul x y = return $ show $ x * y
 
-uuid :: Handler (APIResult String)
+uuid :: Handler String
 uuid = do
   uuid <- liftIO $ nextRandom
-  return $ APIResult $ toString uuid
+  return $ toString uuid
 
-cowsay :: String -> Handler (APIResult String)
+cowsay :: String -> Handler String
 cowsay s = do
     moo <- liftIO $ readProcess "cowsay" [s] ""
-    return $ APIResult moo
+    return moo
 
 rootAPI :: Proxy API
 rootAPI = Proxy
