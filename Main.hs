@@ -36,28 +36,38 @@ import Text.Blaze.Html.Renderer.Utf8
 import Servant.Types.SourceT (source)
 import qualified Data.Aeson.Parser
 import qualified Text.Blaze.Html
+import Data.UUID.V4 (nextRandom)
+import Data.UUID (toString)
+
 
 type API = Get '[JSON] String
-     :<|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] APIResult 
-     :<|> "mul" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] APIResult 
+     :<|> "add" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] (APIResult Int)
+     :<|> "mul" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] (APIResult Int)
+     :<|> "uuid" :> Get '[JSON] (APIResult String)
 
-newtype APIResult = APIResult { result :: Int }
+newtype APIResult a = APIResult { result :: a }
   deriving Generic
-instance ToJSON APIResult
+instance (ToJSON a) => ToJSON (APIResult a)
 
 server :: Server API
 server = base
     :<|> add
     :<|> mul
+    :<|> uuid
 
 base :: Handler String
 base = return ""
 
-add :: Int -> Int -> Handler APIResult 
+add :: Int -> Int -> Handler (APIResult Int)
 add x y = return $ APIResult $ x + y
 
-mul :: Int -> Int -> Handler APIResult 
+mul :: Int -> Int -> Handler (APIResult Int)
 mul x y = return $ APIResult $ x * y
+
+uuid :: Handler (APIResult String)
+uuid = do
+  uuid <- liftIO $ nextRandom
+  return $ APIResult $ toString uuid
 
 rootAPI :: Proxy API
 rootAPI = Proxy

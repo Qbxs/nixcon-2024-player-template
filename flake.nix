@@ -36,6 +36,7 @@
               base-compat
               lucid
               blaze
+              uuid
             ];
           } ./Main.hs;
           default = packages.webserver;
