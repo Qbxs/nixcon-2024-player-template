@@ -34,8 +34,6 @@
               servant
               servant-server
               base-compat
-              lucid
-              blaze
               process
               uuid
             ];
